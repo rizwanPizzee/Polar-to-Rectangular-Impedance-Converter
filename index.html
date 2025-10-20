@@ -84,7 +84,7 @@
         width: 100%;
         padding: 10px 12px;
         border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(26, 47, 66, 0.808);
         background: var(--glass);
         color: inherit;
         font-size: 14px;
@@ -186,11 +186,18 @@
       .value {
         font-family: monospace;
         font-size: 16px;
+        margin: 0;
+        margin-left: 5px;
+        color: white;
+      }
+      .small,
+      .small1 {
+        font-size: 14px;
+        color: var(--muted);
         margin: 6px 0;
       }
-      .small {
-        font-size: 13px;
-        color: var(--muted);
+      .small1 {
+        margin: 0;
       }
       @media (max-width: 640px) {
         .grid {
@@ -351,17 +358,21 @@
         </div>
 
         <div class="output" aria-live="polite">
-          <div class="small">Resistance (R):</div>
-          <div id="rVal" class="value">—</div>
+          <div class="small">
+            Resistance (R):
+            <span id="rVal" class="value">—</span>
+          </div>
 
-          <div class="small">Reactance (X):</div>
-          <div id="xVal" class="value">—</div>
+          <div class="small">
+            Reactance (X): <span id="xVal" class="value">—</span>
+          </div>
 
-          <div class="small">Rectangular form:</div>
-          <div id="rectVal" class="value">—</div>
+          <div class="small">
+            Rectangular form: <span id="rectVal" class="value">—</span>
+          </div>
 
-          <div class="small">Notes:</div>
-          <div id="note" class="small">
+          <div class="small1">Notes:</div>
+          <div id="note" class="small1">
             Positive X = inductive. Negative X = capacitive.
           </div>
         </div>
@@ -594,5 +605,3 @@
     </script>
   </body>
 </html>
-
-
