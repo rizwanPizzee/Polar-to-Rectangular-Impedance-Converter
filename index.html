@@ -444,7 +444,7 @@
 
         const sign = X >= 0 ? "+" : "-";
         const Xabs = fmt(Math.abs(X));
-        rectVal.textContent = `${fmt(R)} ${sign} j ${Xabs} Ω`;
+        rectVal.textContent = `${fmt(R)} ${sign}  ${Xabs} j`;
 
         note.textContent =
           X === 0
@@ -498,3 +498,4 @@
     </script>
   </body>
 </html>
+
