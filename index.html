@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Polar → Rectangular Impedance Converter</title>
+    <style>
+      :root {
+        --bg: #0f1724;
+        --card: #0b1220;
+        --accent: #60a5fa;
+        --muted: #94a3b8;
+        --glass: rgba(255, 255, 255, 0.03);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto,
+          "Helvetica Neue", Arial;
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(180deg, #071027 0%, #071122 100%);
+        color: #e6eef8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 760px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 6px 30px rgba(2, 6, 23, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+      p.lead {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      input[type="number"] {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        background: var(--glass);
+        color: inherit;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+      input[type="number"]:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+      }
+      .custom-select {
+        position: relative;
+        width: 100%;
+      }
+      .custom-select-trigger {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        background: var(--glass);
+        color: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+        user-select: none;
+      }
+      .custom-select-trigger:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      .custom-select-trigger.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+      }
+      .custom-select-arrow {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid var(--muted);
+        transition: transform 0.2s ease;
+      }
+      .custom-select-trigger.active .custom-select-arrow {
+        transform: rotate(180deg);
+      }
+      .custom-select-options {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #1a2332;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 100;
+        max-height: 0;
+        opacity: 0;
+        transition: all 0.2s ease;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      }
+      .custom-select-options.active {
+        max-height: 300px;
+        opacity: 1;
+      }
+      .custom-select-option {
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        font-size: 14px;
+        color: #e6eef8;
+      }
+      .custom-select-option:hover {
+        background: rgba(96, 165, 250, 0.15);
+        color: var(--accent);
+      }
+      .custom-select-option.selected {
+        background: rgba(96, 165, 250, 0.1);
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      button {
+        background: var(--accent);
+        color: #022c54;
+        border: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.ghost {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+      }
+      .output {
+        margin-top: 16px;
+        padding: 14px;
+        border-radius: 10px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.01),
+          transparent
+        );
+        border: 1px solid rgba(255, 255, 255, 0.02);
+      }
+      .value {
+        font-family: monospace;
+        font-size: 16px;
+        margin: 6px 0;
+      }
+      .small {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      @media (max-width: 640px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card" role="main">
+      <h1>Polar → Rectangular Impedance Converter</h1>
+      <p class="lead">
+        Enter magnitude (Z) and angle (θ). The page shows resistance (R) and
+        reactance (X) in real-time. Angle may be in degrees or radians.
+      </p>
+
+      <form id="convForm" autocomplete="off" onsubmit="return false;">
+        <div class="grid">
+          <div>
+            <label for="zInput">Impedance magnitude Z</label>
+            <input
+              id="zInput"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="any"
+              value=""
+              placeholder="Enter Impedance magnitude Z"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="thetaInput">Angle θ</label>
+            <input
+              id="thetaInput"
+              type="number"
+              inputmode="decimal"
+              step="any"
+              value=""
+              placeholder="Enter Angle θ"
+              required
+            />
+          </div>
+
+          <div>
+            <label>Angle units</label>
+            <div class="custom-select" id="unitsSelect">
+              <div class="custom-select-trigger">
+                <span class="custom-select-value">Degrees (°)</span>
+                <div class="custom-select-arrow"></div>
+              </div>
+              <div class="custom-select-options">
+                <div class="custom-select-option selected" data-value="deg">
+                  Degrees (°)
+                </div>
+                <div class="custom-select-option" data-value="rad">
+                  Radians (rad)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label>Display precision (decimal places)</label>
+            <div class="custom-select" id="precisionSelect">
+              <div class="custom-select-trigger">
+                <span class="custom-select-value">4</span>
+                <div class="custom-select-arrow"></div>
+              </div>
+              <div class="custom-select-options">
+                <div class="custom-select-option" data-value="2">2</div>
+                <div class="custom-select-option" data-value="3">3</div>
+                <div class="custom-select-option selected" data-value="4">
+                  4
+                </div>
+                <div class="custom-select-option" data-value="6">6</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="calcBtn" type="button">Calculate</button>
+          <button id="copyBtn" class="ghost" type="button">Copy result</button>
+          <button id="resetBtn" class="ghost" type="button">Reset</button>
+        </div>
+
+        <div class="output" aria-live="polite">
+          <div class="small">Resistance (R):</div>
+          <div id="rVal" class="value">—</div>
+
+          <div class="small">Reactance (X):</div>
+          <div id="xVal" class="value">—</div>
+
+          <div class="small">Rectangular form:</div>
+          <div id="rectVal" class="value">—</div>
+
+          <div class="small">Notes:</div>
+          <div id="note" class="small">
+            Positive X = inductive. Negative X = capacitive.
+          </div>
+        </div>
+
+        <div class="footer"></div>
+      </form>
+    </main>
+
+    <script>
+      class CustomSelect {
+        constructor(element) {
+          this.element = element;
+          this.trigger = element.querySelector(".custom-select-trigger");
+          this.valueDisplay = element.querySelector(".custom-select-value");
+          this.optionsContainer = element.querySelector(
+            ".custom-select-options"
+          );
+          this.options = element.querySelectorAll(".custom-select-option");
+          this.isOpen = false;
+
+          this.init();
+        }
+
+        init() {
+          this.trigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.toggle();
+          });
+
+          this.options.forEach((option) => {
+            option.addEventListener("click", (e) => {
+              e.stopPropagation();
+              this.selectOption(option);
+              this.close();
+            });
+          });
+
+          document.addEventListener("click", () => {
+            if (this.isOpen) this.close();
+          });
+
+          this.trigger.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              this.toggle();
+            }
+          });
+        }
+
+        toggle() {
+          this.isOpen ? this.close() : this.open();
+        }
+
+        open() {
+          this.isOpen = true;
+          this.trigger.classList.add("active");
+          this.optionsContainer.classList.add("active");
+        }
+
+        close() {
+          this.isOpen = false;
+          this.trigger.classList.remove("active");
+          this.optionsContainer.classList.remove("active");
+        }
+
+        selectOption(option) {
+          this.options.forEach((opt) => opt.classList.remove("selected"));
+
+          option.classList.add("selected");
+
+          this.valueDisplay.textContent = option.textContent.trim();
+
+          this.element.dispatchEvent(
+            new Event("change", { bubbles: true, composed: true })
+          );
+          this.element.dispatchEvent(
+            new Event("input", { bubbles: true, composed: true })
+          );
+        }
+
+        getValue() {
+          const selected = this.element.querySelector(
+            ".custom-select-option.selected"
+          );
+          return selected ? selected.dataset.value : null;
+        }
+
+        setValue(value) {
+          const option = Array.from(this.options).find(
+            (opt) => opt.dataset.value === value
+          );
+          if (option) this.selectOption(option);
+        }
+      }
+
+      const unitsSelect = new CustomSelect(
+        document.getElementById("unitsSelect")
+      );
+      const precisionSelect = new CustomSelect(
+        document.getElementById("precisionSelect")
+      );
+
+      const toRad = (deg) => (deg * Math.PI) / 180;
+
+      const zInput = document.getElementById("zInput");
+      const thetaInput = document.getElementById("thetaInput");
+      const rVal = document.getElementById("rVal");
+      const xVal = document.getElementById("xVal");
+      const rectVal = document.getElementById("rectVal");
+      const note = document.getElementById("note");
+      const calcBtn = document.getElementById("calcBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const resetBtn = document.getElementById("resetBtn");
+
+      function calculate() {
+        const Z = Number(zInput.value);
+        let theta = Number(thetaInput.value);
+        const prec = Number(precisionSelect.getValue());
+
+        if (!isFinite(Z) || !isFinite(theta)) {
+          rVal.textContent = "Invalid input";
+          xVal.textContent = "Invalid input";
+          rectVal.textContent = "—";
+          return;
+        }
+
+        if (unitsSelect.getValue() === "deg") theta = toRad(theta);
+
+        const R = Z * Math.cos(theta);
+        const X = Z * Math.sin(theta);
+
+        const fmt = (n) => {
+          if (Math.abs(n) < Math.pow(10, -(prec + 2))) return "0";
+          return Number(n.toFixed(prec)).toString();
+        };
+
+        rVal.textContent = fmt(R) + " Ω";
+        xVal.textContent = fmt(X) + " Ω";
+
+        const sign = X >= 0 ? "+" : "-";
+        const Xabs = fmt(Math.abs(X));
+        rectVal.textContent = `${fmt(R)} ${sign} j ${Xabs} Ω`;
+
+        note.textContent =
+          X === 0
+            ? "Reactance is zero (purely resistive)"
+            : X > 0
+            ? "Positive X = inductive reactance"
+            : "Negative X = capacitive (negative) reactance";
+      }
+
+      async function copyResult() {
+        try {
+          await navigator.clipboard.writeText(rectVal.textContent || "");
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => (copyBtn.textContent = "Copy result"), 1400);
+        } catch (e) {
+          copyBtn.textContent = "Copy failed";
+          setTimeout(() => (copyBtn.textContent = "Copy result"), 1400);
+        }
+      }
+
+      function resetForm() {
+        zInput.value = "";
+        thetaInput.value = "";
+        unitsSelect.setValue("deg");
+        precisionSelect.setValue("4");
+        calculate();
+      }
+
+      calcBtn.addEventListener("click", calculate);
+      copyBtn.addEventListener("click", copyResult);
+      resetBtn.addEventListener("click", resetForm);
+
+      let timer = null;
+      ["input", "change"].forEach((evt) => {
+        document.getElementById("convForm").addEventListener(evt, () => {
+          clearTimeout(timer);
+          timer = setTimeout(calculate, 250);
+        });
+      });
+
+      calculate();
+
+      [zInput, thetaInput].forEach((el) =>
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            calculate();
+          }
+        })
+      );
+    </script>
+  </body>
+</html>
